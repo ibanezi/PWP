@@ -1,14 +1,16 @@
 # Meetings notes
 
 ## Meeting 1.
-* **DATE:**
-* **ASSISTANTS:**
+* **DATE:** 15.2.2021
+* **ASSISTANTS:** Marta Cortes Orduna
 
 ### Minutes
-*Summary of what was discussed during the meeting*
+* Students explained the concepts of their API and briefly described the deliverable 1 sections.
+* Teaching assistant commented on API design and also described the minimum resource requirements.
 
 ### Action points
-*List here the actions points discussed with assistants*
+* Consider the relation between users and ingredients.
+* Related work section could be improved.
 
 
 ### Comments from staff
