@@ -1,7 +1,7 @@
 from os import path, remove
 from CalorieTracker.models import *
 
-DB_PATH = './CalorieTracker/test.db'
+DB_PATH = path.join('.', 'CalorieTracker', 'test.db')
 
 # Delete database because we are populating with values that have uniqueness constraint (user.name)
 if path.isfile(DB_PATH):
@@ -100,7 +100,7 @@ meal_items = [
         ),
     IngredientsInMeal(
         mealId=2,
-        ingredientId=3,
+        ingredientId=4,
         ssize=0.3
         ),
     IngredientsInMeal(
