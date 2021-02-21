@@ -35,7 +35,7 @@ class Ingredient(db.Model):
 
 class IngredientsInMeal(db.Model):
 	mealId = db.Column(db.Integer, db.ForeignKey("meal.id"), primary_key=True)
-	ingredientId = db.Column(db.Integer, db.ForeignKey("ingredients.id"), primary_key=True)
+	ingredientId = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)
 	ssize = db.Column(db.Float, nullable=False)
 
 	meal = db.relationship("Meal", back_populates="ingredients")
