@@ -58,6 +58,7 @@ def _get_ingredient(num='1'):
         fats=12.1
     )
 
+# Test creation of instance for each model
 def test_create_models(db_handle):
     user1 = _get_user()
     user2 = _get_user(num='2')
@@ -100,11 +101,49 @@ def test_create_models(db_handle):
     db_handle.session.commit()
     assert IngredientsInMeal.query.count() == 1
     first_iim = IngredientsInMeal.query.first()
-    ingrtest = Ingredient.query.all()[2]
     assert first_iim.meal == Meal.query.first()
     # kirjoittele tähän lisää kunhan jaksat
 
+def test_query_user(db_handle):
+    user1 = _get_user()
+    user2 = _get_user(num='2')
+    user2.name = 'I am second'
+
+    db_handle.session.add(user1)
+    db_handle.session.add(user2)
+    db_handle.session.commit()
+
+    assert user1.id == User.query.filter_by(name='Username1').first().id
+    assert user2.id == User.query.filter_by(name='I am second').first().id
+
+
+def test_modify_user(db_handle):
+    user1 = _get_user()
+    user2 = _get_user(num='2')
+
+    db_handle.session.add(user1)
+    db_handle.session.add(user2)
+    db_handle.session.commit()
+    before = [user1.name, user2.name]
+    user1.name = 'NewUserName'
+    db_handle.session.commit()
+
+    after = [User.query.get(1).name, User.query.get(2).name]
+    assert before[0] != after[0]
+    assert before[1] == after[1]
     
+def test_delete_user(db_handle):
+    user1 = _get_user()
+    user2 = _get_user(num='2')
+
+    db_handle.session.add(user1)
+    db_handle.session.add(user2)
+    db_handle.session.commit()
+    assert User.query.count() == 2
+    db_handle.session.delete(user1)
+    db_handle.session.commit()
+    assert User.query.count() == 1
+    assert user2.id == 2
 
 def test_unique_constraint(db_handle):
     user1 = _get_user('uniq')
