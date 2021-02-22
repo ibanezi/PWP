@@ -59,7 +59,7 @@ def _get_ingredient(num='1'):
     )
 
 # Test creation of instance for each model
-def test_create_models(db_handle):
+def test_models_create(db_handle):
     user1 = _get_user()
     user2 = _get_user(num='2')
     meal1 = _get_meal()
@@ -104,7 +104,7 @@ def test_create_models(db_handle):
     assert first_iim.meal == Meal.query.first()
     # kirjoittele tähän lisää kunhan jaksat
 
-def test_query_user(db_handle):
+def test_user_query(db_handle):
     user1 = _get_user()
     user2 = _get_user(num='2')
     user2.name = 'I am second'
@@ -117,7 +117,7 @@ def test_query_user(db_handle):
     assert user2.id == User.query.filter_by(name='I am second').first().id
 
 
-def test_modify_user(db_handle):
+def test_user_modify(db_handle):
     user1 = _get_user()
     user2 = _get_user(num='2')
 
@@ -132,7 +132,7 @@ def test_modify_user(db_handle):
     assert before[0] != after[0]
     assert before[1] == after[1]
     
-def test_delete_user(db_handle):
+def test_user_delete(db_handle):
     user1 = _get_user()
     user2 = _get_user(num='2')
 
@@ -156,3 +156,91 @@ def test_unique_constraint(db_handle):
     db_handle.session.add(user3)
     with pytest.raises(IntegrityError):
         db_handle.session.commit()
+        
+def test_ingredient_query(db_handle):
+    ingredient1 = _get_ingredient()
+    ingredient2 = _get_ingredient(num='2')
+    ingredient2.name = 'I am second'
+
+    db_handle.session.add(ingredient1)
+    db_handle.session.add(ingredient2)
+    db_handle.session.commit()
+
+    assert (ingredient1.id == Ingredient.query.filter_by(name='Ingredient1').first().id)
+    assert (ingredient2.id == Ingredient.query.filter_by(name='I am second').first().id)
+
+def test_ingredient_modify(db_handle):
+    ingredient1 = _get_ingredient()
+
+    db_handle.session.add(ingredient1)
+    db_handle.session.commit()
+    assert (1 == Ingredient.query.count())
+
+    db_ingredient = Ingredient.query.first()
+    assert (200 == db_ingredient.kcal)
+
+    ingredient1.kcal = 350
+    db_handle.session.commit()
+    db_ingredient = Ingredient.query.first()
+    assert (350 == db_ingredient.kcal)
+
+def test_ingredient_delete(db_handle):
+    ingredient1 = _get_ingredient()
+    ingredient2 = _get_ingredient(num='2')
+
+    db_handle.session.add(ingredient1)
+    db_handle.session.add(ingredient2)
+    db_handle.session.commit()
+    assert (2 == Ingredient.query.count())
+
+    db_handle.session.delete(ingredient1)
+    db_handle.session.commit()
+    assert (1 == Ingredient.query.count())
+
+def test_meal_query(db_handle):
+    user = _get_user()
+    meal1 = _get_meal()
+    meal2 = _get_meal(num='2')
+    meal2.name = 'I am second'
+
+    db_handle.session.add(user)
+    db_handle.session.add(meal1)
+    db_handle.session.add(meal2)
+    db_handle.session.commit()
+
+    assert (meal1.id == Meal.query.filter_by(name='Meal1').first().id)
+    assert (meal2.id == Meal.query.filter_by(name='I am second').first().id)
+
+def test_meal_modify(db_handle):
+    user = _get_user()
+    meal = _get_meal()
+
+    db_handle.session.add(user)
+    db_handle.session.add(meal)
+    db_handle.session.commit()
+    assert User.query.count() == 1
+    assert Meal.query.count() == 1
+
+    db_meal = Meal.query.first()
+    assert ('Meal1' == db_meal.name)
+
+    meal.name = 'Kurkkusalaatti'
+    db_handle.session.commit()
+    db_meal = Meal.query.first()
+    assert ('Kurkkusalaatti' == db_meal.name)
+
+def test_meal_delete(db_handle):
+    user = _get_user()
+    meal1 = _get_meal()
+    meal2 = _get_meal(num='2')
+
+    db_handle.session.add(user)
+    db_handle.session.add(meal1)
+    db_handle.session.add(meal2)
+    db_handle.session.commit
+    assert (2 == Meal.query.count())
+
+    db_handle.session.delete(meal1)
+    db_handle.session.commit()
+    assert (1 == Meal.query.count())
+        
