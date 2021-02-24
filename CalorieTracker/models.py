@@ -11,7 +11,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(16), nullable=False, unique=True)
 
-    meals = db.relationship('Meal', back_populates='user', cascade='all, delete')
+    meals = db.relationship('Meal', back_populates='user', passive_deletes=True)
 
 class Meal(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -20,7 +20,7 @@ class Meal(db.Model):
 	description = db.Column(db.String(255))
 
 	user = db.relationship('User', back_populates='meals')
-	ingredients = db.relationship('IngredientsInMeal', back_populates='meal', cascade='all, delete')
+	ingredients = db.relationship('IngredientsInMeal', back_populates='meal', passive_deletes=True)
 
 class Ingredient(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -31,11 +31,11 @@ class Ingredient(db.Model):
 	proteins = db.Column(db.Float)
 	fats = db.Column(db.Float)
 
-	meal = db.relationship('IngredientsInMeal', back_populates='ingredients', cascade='all, delete')
+	meal = db.relationship('IngredientsInMeal', back_populates='ingredients', passive_deletes=True)
 
 class IngredientsInMeal(db.Model):
-	mealId = db.Column(db.Integer, db.ForeignKey('meal.id'), primary_key=True)
-	ingredientId = db.Column(db.Integer, db.ForeignKey('ingredient.id'), primary_key=True)
+	mealId = db.Column(db.Integer, db.ForeignKey('meal.id', ondelete='CASCADE'), primary_key=True)
+	ingredientId = db.Column(db.Integer, db.ForeignKey('ingredient.id', ondelete='CASCADE'), primary_key=True)
 	ssize = db.Column(db.Float, nullable=False)
 
 	meal = db.relationship('Meal', back_populates='ingredients')
