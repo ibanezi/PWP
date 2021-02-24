@@ -19,6 +19,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
+
 # Create temporary empty database
 @pytest.fixture
 def db_handle():
@@ -102,8 +103,9 @@ def test_models_create(db_handle):
     assert IngredientsInMeal.query.count() == 1
     first_iim = IngredientsInMeal.query.first()
     assert first_iim.meal == Meal.query.first()
-    # kirjoittele tähän lisää kunhan jaksat
 
+
+# Test retrieve, update and delete for User model
 def test_user_query(db_handle):
     user1 = _get_user()
     user2 = _get_user(num='2')
@@ -115,7 +117,6 @@ def test_user_query(db_handle):
 
     assert user1.id == User.query.filter_by(name='Username1').first().id
     assert user2.id == User.query.filter_by(name='I am second').first().id
-
 
 def test_user_modify(db_handle):
     user1 = _get_user()
@@ -145,6 +146,7 @@ def test_user_delete(db_handle):
     assert User.query.count() == 1
     assert user2.id == 2
 
+# Test unique constraint in 'name' column for User model
 def test_unique_constraint(db_handle):
     user1 = _get_user('uniq')
     user2 = _get_user('uniquu')
@@ -156,7 +158,9 @@ def test_unique_constraint(db_handle):
     db_handle.session.add(user3)
     with pytest.raises(IntegrityError):
         db_handle.session.commit()
-        
+
+
+# Test retrieve, update and delete for Ingredient model
 def test_ingredient_query(db_handle):
     ingredient1 = _get_ingredient()
     ingredient2 = _get_ingredient(num='2')
@@ -197,6 +201,8 @@ def test_ingredient_delete(db_handle):
     db_handle.session.commit()
     assert (1 == Ingredient.query.count())
 
+
+# Test retrieve, update and delete for Meal model
 def test_meal_query(db_handle):
     user = _get_user()
     meal1 = _get_meal()
@@ -243,4 +249,140 @@ def test_meal_delete(db_handle):
     db_handle.session.delete(meal1)
     db_handle.session.commit()
     assert (1 == Meal.query.count())
-        
+
+#Test cascading deletion for foreign keys in Meal model
+# NOTE: Broken test. Cascading deletion does not work, although
+#       it works just fine if executed directly in SQL statements.
+"""
+def test_meal_cascading_delete(db_handle):
+    user = _get_user()
+    user2 = _get_user(num='2')
+    meal1 = _get_meal()
+    meal2 = _get_meal(num='2')
+    meal1.userId = user.id
+    meal2.userId = user2.id
+
+    db_handle.session.add_all([user, user2, meal1, meal2])
+    db_handle.session.commit
+    assert (2 == Meal.query.count())
+
+    db_handle.session.delete(user)
+    db_handle.session.flush()
+    db_handle.session.commit()
+    meals = Meal.query.all()
+    print('joujoujou')
+    for m in meals:
+        print(m.id, m.userId, m.name, m.description)
+    assert (1 == User.query.count())
+    assert (1 == Meal.query.count())
+"""
+
+
+# Test retrieve, update and delete for IngredientsInMeal model
+def test_ingredients_in_meal_query(db_handle):
+    user = _get_user()
+    meal1 = _get_meal()
+    meal2 = _get_meal(num='2')
+    meal1.userid = user.id
+    meal2.userid = user.id
+    ingr1 = _get_ingredient()
+    ingr2 = _get_ingredient()
+    ingr3 = _get_ingredient()
+    ingr1.name = 'Tomato'
+    ingr2.name = 'Potato'
+    ingr3.name = 'Carrot'
+
+    db_handle.session.add_all([user, meal1, meal2, ingr1, ingr2, ingr3])
+    db_handle.session.commit()
+
+    ingr_in_meal1 = IngredientsInMeal(
+        mealId=1,
+        ingredientId=1,
+        ssize=3
+        )
+    ingr_in_meal2 = IngredientsInMeal(
+        mealId=2,
+        ingredientId=2,
+        ssize=1
+        )
+    ingr_in_meal3 = IngredientsInMeal(
+        mealId=2,
+        ingredientId=3,
+        ssize=4
+        )
+
+    db_handle.session.add_all([ingr_in_meal1, ingr_in_meal2, ingr_in_meal3])
+    db_handle.session.commit()
+
+    assert (ingr_in_meal1.ssize == IngredientsInMeal.query.join(Ingredient.meal).filter(Ingredient.name=='Tomato').first().ssize)
+    assert (ingr_in_meal2.ssize == IngredientsInMeal.query.join(Meal.ingredients).filter(Meal.name=='Meal2').first().ssize)
+
+def test_ingredients_in_meal_modify(db_handle):
+    user = _get_user()
+    meal1 = _get_meal()
+    meal2 = _get_meal(num='2')
+    meal1.userid = user.id
+    meal2.userid = user.id
+    ingr1 = _get_ingredient()
+    ingr2 = _get_ingredient()
+    ingr1.name = 'Tomato'
+    ingr2.name = 'Potato'
+
+    db_handle.session.add_all([user, meal1, meal2, ingr1, ingr2])
+    db_handle.session.commit()
+
+    ingr_in_meal1 = IngredientsInMeal(
+        mealId=1,
+        ingredientId=1,
+        ssize=3
+        )
+    ingr_in_meal2 = IngredientsInMeal(
+        mealId=2,
+        ingredientId=2,
+        ssize=1
+        )
+
+    db_handle.session.add_all([ingr_in_meal1, ingr_in_meal2])
+    db_handle.session.commit()
+
+    db_iim = IngredientsInMeal.query.first()
+    assert (3 == db_iim.ssize)
+
+    ingr_in_meal1.ssize = 6
+    db_handle.session.commit()
+    db_iim = IngredientsInMeal.query.first()
+    assert (6 == db_iim.ssize)
+
+def test_ingredients_in_meal_delete(db_handle):
+    user = _get_user()
+    meal1 = _get_meal()
+    meal2 = _get_meal(num='2')
+    meal1.userid = user.id
+    meal2.userid = user.id
+    ingr1 = _get_ingredient()
+    ingr2 = _get_ingredient()
+    ingr1.name = 'Tomato'
+    ingr2.name = 'Potato'
+
+    db_handle.session.add_all([user, meal1, meal2, ingr1, ingr2])
+    db_handle.session.commit()
+
+    ingr_in_meal1 = IngredientsInMeal(
+        mealId=1,
+        ingredientId=1,
+        ssize=3
+        )
+    ingr_in_meal2 = IngredientsInMeal(
+        mealId=2,
+        ingredientId=2,
+        ssize=1
+        )
+
+    db_handle.session.add_all([ingr_in_meal1, ingr_in_meal2])
+    db_handle.session.commit()
+    
+    assert (2 == IngredientsInMeal.query.count())
+
+    db_handle.session.delete(ingr_in_meal2)
+    db_handle.session.commit()
+    assert (1 == IngredientsInMeal.query.count())

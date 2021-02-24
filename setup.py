@@ -1,5 +1,14 @@
 from os import path, remove
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from CalorieTracker.models import *
+
+# Set foreign keys support
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 DB_PATH = path.join('.', 'CalorieTracker', 'test.db')
 
