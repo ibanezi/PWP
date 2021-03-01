@@ -17,15 +17,17 @@
 *ONLY USED BY COURSE STAFF: Additional comments from the course staff*
 
 ## Meeting 2.
-* **DATE:**
-* **ASSISTANTS:**
+* **DATE:** 01.03.2021.
+* **ASSISTANTS:** Marta Cortes Orduna
 
 ### Minutes
-*Summary of what was discussed during the meeting*
+* Went through wiki page
+* Went through database tests
+* Explained a bit why CASCADE delete UT did not work
 
 ### Action points
-*List here the actions points discussed with assistants*
-
+* Document tests better
+* Assistant will check the CASCADE test and report back to us
 
 ### Comments from staff
 *ONLY USED BY COURSE STAFF: Additional comments from the course staff*
